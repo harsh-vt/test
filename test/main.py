@@ -15,7 +15,7 @@ from fastapi.exceptions import RequestValidationError
 from . import crud, models, schemas
 from .database import SessionLocal, engine
 from starlette.middleware.cors import CORSMiddleware
-from starlette.staticfiles import StaticFiles
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -56,17 +56,19 @@ html = """
         <title>Hi</title>
     </head>
     <body>
-        <h1>Wassup!!@#$</h1>
+        <h1>Testing 123</h1>
     </body>
 </html>
 """
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+subtest = FastAPI(openapi_prefix="/subtest")
+
 @app.get("/")
 async def get():
     return HTMLResponse(html)
 
-@app.get("/first_timer/{flag}")
+@subtest.get("/first_timer/{flag}")
 def first_timer(flag:int,  db: Session = Depends(get_db)):
     if flag == 1:
         db_place = crud.initial(db)
@@ -104,7 +106,7 @@ def get_using_self(lat: float, lon: float, lim: int, db: Session = Depends(get_d
     db_list = crud.get_place_using_self(db, lat, lon, lim)
     return db_list
 
-@app.post("/find_place/post_files/")
+@subtest.post("/find_place/post_files/")
 def create_geof(db: Session = Depends(get_db)):
    # with open('map.geojson.txt') as json_file:
    with open(os.path.join(__location__, "map_geojson.txt")) as f:
@@ -125,7 +127,7 @@ def get_geof(lat: float, lon: float, db: Session = Depends(get_db)):
     return db_place
 
 
-@app.get("/find_place")
+@subtest.get("/find_place")
 async def main():
     content = """
 <body>
@@ -136,3 +138,4 @@ async def main():
 </body>
     """
     return HTMLResponse(content=content)
+app.mount("/subtest", subtest)

@@ -3,6 +3,5 @@ gunicorn
 geojson
 sqlalchemy
 starlette
-psycopg2
 uvicorn
 aiofiles
