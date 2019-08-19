@@ -4,7 +4,7 @@ Created on Tue Aug  6 01:15:09 2019
 
 @author: MOJO-JOJO
 """
-
+from test.meta import VERSION, DESCRIPTION
 from typing import List
 import geojson, json, os
 from fastapi import Depends, FastAPI, HTTPException
@@ -19,7 +19,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(title="Location handler", version=VERSION, description=DESCRIPTION)
 exceptions = exc.sa_exc
 
 app.add_middleware(
@@ -68,7 +68,10 @@ subtest = FastAPI(openapi_prefix="/subtest")
 async def get():
     return HTMLResponse(html)
 
-@subtest.get("/get_all/")
+@subtest.get("/get_all/",
+             summary="Get all locations",
+             description="For testing purpose. Returns all locations in 'location_id' table",
+             )
 def get_all(db: Session = Depends(get_db)):
     db_place = crud.get_all(db)
     if len(db_place)<1:
@@ -76,7 +79,10 @@ def get_all(db: Session = Depends(get_db)):
     return db_place
 
 
-@subtest.get("/first_timer/{flag}")
+@subtest.get("/first_timer/{flag}",
+             summary="Initialize Earthdistance functions",
+             description="For testing purpose. Initialize database with extensions cube and earthdistance for '/detect/'",
+             )
 def first_timer(flag:int,  db: Session = Depends(get_db)):
     if flag == 1:
         db_place = crud.initial(db)
@@ -84,7 +90,10 @@ def first_timer(flag:int,  db: Session = Depends(get_db)):
             HTMLResponse(content = "database initialized successfully", status_code=200)
     return HTMLResponse(status_code=200, detail="wrong flag or selected 0. try again later after create_geof if something wrong there")
 
-@app.post("/post_location/", response_model=schemas.get_Places)
+@app.post("/post_location/", response_model=schemas.get_Places,
+             summary="Add new location in database",
+             description="Insert new location with distinct pincode and location parameters. Check for close enough latitude and longitude. Returs id for new location and location data.",
+             )
 def post_location(place: schemas.post_Places, db: Session = Depends(get_db)):
     try: 
         db_place = crud.loc_check(db, lat =  place.latitude, lon = place.longitude)
@@ -97,30 +106,41 @@ def post_location(place: schemas.post_Places, db: Session = Depends(get_db)):
     except TypeError:
         return crud.post_place(db=db, place=place)
     
-@app.get("/get_location/", response_model=List[schemas.get_Places])
+@app.get("/get_location/", response_model=List[schemas.get_Places],
+             summary="Get data from location database",
+             description="Finds location by location parameters in 'location_id' table. 'lat' = Latitude. 'lon' = longitude. Both are of float data type.",
+             )
 def get_location(lat: float, lon: float, db: Session = Depends(get_db)):
     db_place = crud.get_place_by_lat_n_lon(db, lat, lon)
     if len(db_place)<1:
         raise HTTPException(status_code=420, detail="Location not found")
     return db_place
 
-@app.get("/get_using_postgres/", response_model=List[schemas.get_Places])
+@app.get("/get_using_postgres/", response_model=List[schemas.get_Places],
+             summary="Find nearby location using postgres' earthdistance",
+             description="Get all locations in databse nerby given parameters within a range. Uses postgres' ll_to_earth and earth_distance function. 'lat' = Latitude. 'lon' = longitude. Both are of float data type. 'lim' = limit or boundary (integer type).",
+             )
 def get_using_postgres(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_postgres(db, lat, lon, lim)
     if len(db_list)<1:
         return HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=201)
     return db_list
 
-@app.get("/get_using_self/", response_model=List[schemas.get_Places])
+@app.get("/get_using_self/", response_model=List[schemas.get_Places],
+             summary="Find nearby location using user defined functions",
+             description="Get all locations in databse nerby given parameters within a range. Uses python math functions. 'lat' = Latitude. 'lon' = longitude. Both are of float data type. 'lim' = limit or boundary (integer type).",
+             )
 def get_using_self(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_self(db, lat, lon, lim)
     if len(db_list)<1:
         return HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=202)
     return db_list
 
-@subtest.post("/find_place/post_files/")
+@subtest.post("/find_place/post_files/",
+             summary="Add geojson file",
+             description="For testing purpose. Initialize 'geo_table' by adding map_geojson.txt file to database."
+             )
 def create_geof(db: Session = Depends(get_db)):
-   # with open('map.geojson.txt') as json_file:
    with open(os.path.join(__location__, "map_geojson.txt")) as f:
        for lines in f:
            data = json.loads(lines)
@@ -131,23 +151,14 @@ def create_geof(db: Session = Depends(get_db)):
            crud.post_geof(db, placename, j[0], j[1])
    return HTMLResponse(content = "database posted successfully", status_code=200)
 
-@app.get("/detect/", response_model=List)
+@app.get("/detect/", response_model=List,
+             summary="Get area name from Geojson",
+             description="Get area name form boundaries defined in geojson file. 'lat' = Latitude. 'lon' = longitude. Both are of float data type.",
+             )
 def get_geof(lat: float, lon: float, db: Session = Depends(get_db)):
     db_place = crud.get_geof(db, lat, lon)
     if db_place is False:
         raise HTTPException(status_code=404, detail="Location not found")
     return db_place
 
-
-@subtest.get("/find_place")
-async def main():
-    content = """
-<body>
-<form action="/find_place/files/" enctype="multipart/form-data" method="post">
-<input name="files" type="file">
-<input type="submit">
-</form>
-</body>
-    """
-    return HTMLResponse(content=content)
 app.mount("/subtest", subtest)
