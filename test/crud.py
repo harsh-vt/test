@@ -9,7 +9,7 @@ from sqlalchemy import func
 from math import radians, cos, sin, asin, sqrt
 from . import models, schemas
 
-
+# function to initialize database
 def initial(db):
     db.execute("""CREATE EXTENSION cube;
 CREATE EXTENSION earthdistance;""")

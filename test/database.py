@@ -8,17 +8,8 @@ Created on Wed Jul 31 20:25:26 2019
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-#import os
-#SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-#SQLALCHEMY_DATABASE_URL = "postgresql://postgres:1234@localhost:5432/location_db"
-#SQLALCHEMY_DATABASE_URL = "postgres+psycopg2://$(whoami)"
-SQLALCHEMY_DATABASE_URL = "postgres://exqokjsiwrkslh:e55831391dde495b7d33e4c2b37de96fa7c9ad50f44484aea80a89fcfb4ddda8@ec2-54-225-72-238.compute-1.amazonaws.com:5432/d9mgc66is0glh9"
 
-
-#DATABASE_URL = os.environ['DATABASE_URL']
-
-#conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
+SQLALCHEMY_DATABASE_URL = "postgres://wsqprfypwgeksc:906144aad5862c6733154d92c04c1a861f6fb17237f46be225e8128da428204c@ec2-23-21-91-183.compute-1.amazonaws.com:5432/d1ev6uehp66juh"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -99,6 +99,8 @@ def get_location(lat: float, lon: float, db: Session = Depends(get_db)):
 @app.get("/get_using_postgres/", response_model=List[schemas.get_Places])
 def get_using_postgres(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_postgres(db, lat, lon, lim)
+    if len(db_list)<1:
+        HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=201)
     return db_list
 
 @app.get("/get_using_self/", response_model=List[schemas.get_Places])
