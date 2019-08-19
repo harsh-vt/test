@@ -70,7 +70,7 @@ async def get():
 
 @subtest.get("/get_all/",
              summary="Get all locations",
-             description="For testing purpose. Returns all locations in 'location_id' table",
+             description="For testing purpose. Returns all locations in 'location_id' table.",
              )
 def get_all(db: Session = Depends(get_db)):
     db_place = crud.get_all(db)
@@ -81,7 +81,7 @@ def get_all(db: Session = Depends(get_db)):
 
 @subtest.get("/first_timer/{flag}",
              summary="Initialize Earthdistance functions",
-             description="For testing purpose. Initialize database with extensions cube and earthdistance for '/detect/'",
+             description="For testing purpose. Initialize database with extensions cube and earthdistance for '/detect/'. Set flag to 1 for initializing.",
              )
 def first_timer(flag:int,  db: Session = Depends(get_db)):
     if flag == 1:
@@ -117,8 +117,8 @@ def get_location(lat: float, lon: float, db: Session = Depends(get_db)):
     return db_place
 
 @app.get("/get_using_postgres/", response_model=List[schemas.get_Places],
-             summary="Find nearby location using postgres' earthdistance",
-             description="Get all locations in databse nerby given parameters within a range. Uses postgres' ll_to_earth and earth_distance function. 'lat' = Latitude. 'lon' = longitude. Both are of float data type. 'lim' = limit or boundary (integer type).",
+             summary="Find nearby location using postgresql earthdistance",
+             description="Get all locations in databse nerby given parameters within a range. Uses postgresql ll_to_earth and earth_distance function. 'lat' = Latitude. 'lon' = longitude. Both are of float data type. 'lim' = limit or boundary (integer type).",
              )
 def get_using_postgres(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_postgres(db, lat, lon, lim)
@@ -136,7 +136,7 @@ def get_using_self(lat: float, lon: float, lim: int, db: Session = Depends(get_d
         return HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=202)
     return db_list
 
-@subtest.post("/find_place/post_files/",
+@subtest.post("/post_place/",
              summary="Add geojson file",
              description="For testing purpose. Initialize 'geo_table' by adding map_geojson.txt file to database."
              )
