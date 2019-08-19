@@ -4,4 +4,4 @@ geojson
 sqlalchemy
 starlette
 uvicorn
-aiofiles
+psycopg2
