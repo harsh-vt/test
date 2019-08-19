@@ -19,7 +19,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Location handler", version=VERSION, description=DESCRIPTION)
+app = FastAPI(title="Location Handler (Test)", version=VERSION, description=DESCRIPTION)
 exceptions = exc.sa_exc
 
 app.add_middleware(
@@ -92,7 +92,7 @@ def first_timer(flag:int,  db: Session = Depends(get_db)):
 
 @app.post("/post_location/", response_model=schemas.get_Places,
              summary="Add new location in database",
-             description="Insert new location with distinct pincode and location parameters. Check for close enough latitude and longitude. Returs id for new location and location data.",
+             description="Insert new location with distinct pincode and location parameters. Check for close enough latitude and longitude. Returns id for new location and location data.",
              )
 def post_location(place: schemas.post_Places, db: Session = Depends(get_db)):
     try: 
