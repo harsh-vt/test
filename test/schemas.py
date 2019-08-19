@@ -10,7 +10,7 @@ from pydantic import BaseModel
 class post_Places(BaseModel):
     pincode: str
     place_name: str
-    admin_name1: str
+    admin_name: str
     latitude: float = None
     longitude: float = None
     accuracy: int = None

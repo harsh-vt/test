@@ -11,12 +11,13 @@ def test_main():
     assert response.status_code == 200
 
 def test_post_location():
-    #change response after each test as it adds to database and check id before test in database
+    # change response after each test as it adds to database and check 'id' before test in database
+    # id parameter skipped from 8000 to 110046
     response = client.post(
         "/post_location/",
         json={"pincode": "xx/44444",
           "place_name": "roger",
-          "admin_name1": "waters",
+          "admin_name": "waters",
           "latitude": 77.88,
           "longitude": 99.11,
           "accuracy": null}
@@ -25,21 +26,22 @@ def test_post_location():
     assert response.json() == {
           "pincode": "xx/44444",
           "place_name": "roger",
-          "admin_name1": "waters",
+          "admin_name": "waters",
           "latitude": 77.88,
           "longitude": 99.11,
           "accuracy": null,
-          "id": 6
+          "id": 11047
     }
     
 def test_post_location2():
+    # pincode of Faridabad, Uttar Pradesh
     response = client.post(
         "/post_location/",
-        json={"pincode": "xx/88888",
+        json={"pincode": "IN/121001",
           "place_name": "roger",
-          "admin_name1": "waters",
-          "latitude": 77.88,
-          "longitude": 99.11,
+          "admin_name": "waters",
+          "latitude": 11.22,
+          "longitude": 44.55,
           "accuracy": null}
     )
     assert response.status_code == 418
@@ -48,13 +50,14 @@ def test_post_location2():
     }
 
 def test_post_location3():
+    # parameters of Gurur, Chattisgarh
     response = client.post(
         "/post_location/",
         json={"pincode": "xx/44444",
           "place_name": "roger",
-          "admin_name1": "waters",
-          "latitude": 44.55,
-          "longitude": 66.77,
+          "admin_name": "waters",
+          "latitude": 20.6833,
+          "longitude": 81.4,
           "accuracy": null}
     )
     assert response.status_code == 418
@@ -63,13 +66,14 @@ def test_post_location3():
     }
 
 def test_post_location4():
+    # parameters close to Inderlok, New Delhi
     response = client.post(
         "/post_location/",
         json={"pincode": "xx/44444",
           "place_name": "roger",
-          "admin_name1": "waters",
-          "latitude": 44.549998,
-          "longitude": 66.769998,
+          "admin_name": "waters",
+          "latitude":  28.75559,
+          "longitude": 77.16669,
           "accuracy": null}
     )
     assert response.status_code == 418
@@ -79,21 +83,22 @@ def test_post_location4():
 
 
 def test_get_location():
-    response = client.get("/get_location/?lat=28.6667&lon=77.3167")
+    response = client.get("/get_location/?lat=28.7165&lon=77.1629")
     assert response.status_code == 200
     assert response.json() == [
   {
-    "pincode": "IN/110032",
-    "place_name": "Shahdara",
-    "admin_name1": "New Delhi",
-    "latitude": 28.6667,
-    "longitude": 77.3167,
-    "accuracy": 4,
-    "id": 32
+    "pincode": "IN/110088",
+    "place_name": "Shalimar Bagh",
+    "admin_name": "New Delhi",
+    "latitude": 28.7165,
+    "longitude": 77.1629,
+    "accuracy": 6,
+    "id": 75
   }
 ]
     
 def test_get_location2():
+    # imaginary parameters
     response = client.get("/get_location/?lat=12.34&lon=56.78")
     assert response.status_code == 420
     assert response.json() == {
@@ -108,7 +113,7 @@ def test_get_using_postgres():
   {
     "pincode": "IN/144301",
     "place_name": "Alawalpur",
-    "admin_name1": "Punjab",
+    "admin_name": "Punjab",
     "latitude": 31.4328,
     "longitude": 75.6508,
     "accuracy": 4,
@@ -117,7 +122,7 @@ def test_get_using_postgres():
   {
     "pincode": "IN/144303",
     "place_name": "Kala Bakra",
-    "admin_name1": "Punjab",
+    "admin_name": "Punjab",
     "latitude": 31.4328,
     "longitude": 75.6508,
     "accuracy": null,
@@ -126,7 +131,7 @@ def test_get_using_postgres():
   {
     "pincode": "IN/144304",
     "place_name": "Lakhinder",
-    "admin_name1": "Punjab",
+    "admin_name": "Punjab",
     "latitude": 31.4328,
     "longitude": 75.6508,
     "accuracy": null,
@@ -135,7 +140,7 @@ def test_get_using_postgres():
   {
     "pincode": "IN/144305",
     "place_name": "Khudda",
-    "admin_name1": "Punjab",
+    "admin_name": "Punjab",
     "latitude": 31.4328,
     "longitude": 75.6508,
     "accuracy": null,
@@ -144,58 +149,57 @@ def test_get_using_postgres():
 ]
         
 def test_get_using_postgres2():
-    response = client.get("get_using_postgres/?lat=11.2198&lon=33.4398&lim=5")
-    assert response.status_code == 200
-    assert response.json() == [
-      {
-        "pincode": "xx/99999",
-        "place_name": "foo",
-        "admin_name1": "fighter",
-        "latitude": 11.22,
-        "longitude": 33.44,
-        "accuracy": null,
-        "id": 1
-      }
-    ]
+    # imaginary parameters
+    response = client.get("get_using_postgres/?lat=33.4329&lon=78.6507&lim=4")
+    assert response.status_code == 201
+    
 
 def test_get_using_self():
-    response = client.get("get_using_self/?lat=11.2198&lon=33.4398&lim=100")
+    response = client.get("get_using_self/?lat=31.4329&lon=75.6507&lim=1")
     assert response.status_code == 200
     assert response.json() == [
-      {
-        "pincode": "xx/99999",
-        "place_name": "foo",
-        "admin_name1": "fighter",
-        "latitude": 11.22,
-        "longitude": 33.44,
-        "accuracy": null,
-        "id": 1
-      },
-      {
-        "pincode": "xx/88888",
-        "place_name": "pink",
-        "admin_name1": "floyd",
-        "latitude": 11.21998,
-        "longitude": 33.4998,
-        "accuracy": null,
-        "id": 2
-      }
-    ]
+  {
+    "pincode": "IN/144305",
+    "place_name": "Khudda",
+    "admin_name": "Punjab",
+    "latitude": 31.4328,
+    "longitude": 75.6508,
+    "accuracy": null,
+    "id": 747
+  },
+  {
+    "pincode": "IN/144304",
+    "place_name": "Lakhinder",
+    "admin_name": "Punjab",
+    "latitude": 31.4328,
+    "longitude": 75.6508,
+    "accuracy": null,
+    "id": 746
+  },
+  {
+    "pincode": "IN/144303",
+    "place_name": "Kala Bakra",
+    "admin_name": "Punjab",
+    "latitude": 31.4328,
+    "longitude": 75.6508,
+    "accuracy": null,
+    "id": 745
+  },
+  {
+    "pincode": "IN/144301",
+    "place_name": "Alawalpur",
+    "admin_name": "Punjab",
+    "latitude": 31.4328,
+    "longitude": 75.6508,
+    "accuracy": 4,
+    "id": 744
+  }
+]
         
 def test_get_using_self2():
-    response = client.get("get_using_self/?lat=11.2198&lon=33.4398&lim=5")
-    assert response.status_code == 200
-    assert response.json() == [
-      {
-        "pincode": "xx/99999",
-        "place_name": "foo",
-        "admin_name1": "fighter",
-        "latitude": 11.22,
-        "longitude": 33.44,
-        "accuracy": null,
-        "id": 1
-      }
-    ]
+    # imaginary parameters
+    response = client.get("get_using_self/?lat=33.4329&lon=78.6507&lim=10")
+    assert response.status_code == 202
 
 
 def test_detect():
@@ -208,6 +212,7 @@ def test_detect():
     ]
       
 def test_detect2():
+    # imaginary parameters
     response = client.get("/detect/?lat=11.22&lon=33.44")
     assert response.status_code == 404
     assert response.json() == {

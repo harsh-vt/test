@@ -15,6 +15,11 @@ def initial(db):
 CREATE EXTENSION earthdistance;""")
     return 1
 
+# function to get all
+def get_all(db):
+    return db.query(models.Places).all()
+    
+
 # function for finding place by latitude and longitude stored in database
 def get_place_by_lat_n_lon(db: Session, lat: float, lon: float):
     return db.query(models.Places).filter(models.Places.latitude == lat, models.Places.longitude == lon).all()
@@ -108,7 +113,7 @@ def pin_check(db: Session, pin: str):
 # function to add place in database table "location_id"
 def post_place(db: Session, place: schemas.post_Places):
     db_place = models.Places(latitude = place.latitude, longitude =  place.longitude, pincode =  place.pincode, place_name =  place.place_name,
-                            admin_name1 =  place.admin_name1)
+                            admin_name =  place.admin_name)
     db.add(db_place)
     db.commit()
     db.refresh(db_place)

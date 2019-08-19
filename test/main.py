@@ -68,6 +68,14 @@ subtest = FastAPI(openapi_prefix="/subtest")
 async def get():
     return HTMLResponse(html)
 
+@subtest.get("/get_all/")
+def get_all(db: Session = Depends(get_db)):
+    db_place = crud.get_all(db)
+    if len(db_place)<1:
+        HTTPException (status_code=403, detail = "database empty")
+    return db_place
+
+
 @subtest.get("/first_timer/{flag}")
 def first_timer(flag:int,  db: Session = Depends(get_db)):
     if flag == 1:
@@ -100,12 +108,14 @@ def get_location(lat: float, lon: float, db: Session = Depends(get_db)):
 def get_using_postgres(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_postgres(db, lat, lon, lim)
     if len(db_list)<1:
-        HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=201)
+        return HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=201)
     return db_list
 
 @app.get("/get_using_self/", response_model=List[schemas.get_Places])
 def get_using_self(lat: float, lon: float, lim: int, db: Session = Depends(get_db)):
     db_list = crud.get_place_using_self(db, lat, lon, lim)
+    if len(db_list)<1:
+        return HTMLResponse(content = "Cities in database are not within the limit. Change location or limit.", status_code=202)
     return db_list
 
 @subtest.post("/find_place/post_files/")

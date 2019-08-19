@@ -16,7 +16,7 @@ class Places(Base):
     id = Column(Integer, primary_key=True, index=True)
     pincode = Column(String, unique=True, index=True)
     place_name = Column(String, index=True)
-    admin_name1 = Column(String, index=True)
+    admin_name = Column(String, index=True)
     latitude = Column(Float, index=True)
     longitude = Column(Float, index=True)
     accuracy = Column(Integer)
