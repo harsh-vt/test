@@ -8,7 +8,7 @@ from test.meta import VERSION, DESCRIPTION
 from typing import List
 import geojson, json, os
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session, exc
+from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.responses import Response, PlainTextResponse, HTMLResponse
 from fastapi.exceptions import RequestValidationError
@@ -16,11 +16,9 @@ from . import crud, models, schemas
 from .database import SessionLocal, engine
 from starlette.middleware.cors import CORSMiddleware
 
-
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Location Handler (Test)", version=VERSION, description=DESCRIPTION)
-exceptions = exc.sa_exc
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +37,6 @@ async def db_session_middleware(request: Request, call_next):
     finally:
         request.state.db.close()
     return response
-
 
 # Dependency
 def get_db(request: Request):

@@ -15,8 +15,8 @@ class Places(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     pincode = Column(String, unique=True, index=True)
-    place_name = Column(String, index=True)
-    admin_name = Column(String, index=True)
+    place_name = Column(String)
+    admin_name = Column(String)
     latitude = Column(Float, index=True)
     longitude = Column(Float, index=True)
     accuracy = Column(Integer)
@@ -25,6 +25,6 @@ class Geof(Base):
     __tablename__ = "geo_table"
 
     id = Column(Integer, primary_key=True, index=True)
-    place_name = Column(String, index=True)
+    place_name = Column(String)
     latitude = Column(Float, index=True)
     longitude = Column(Float, index=True)

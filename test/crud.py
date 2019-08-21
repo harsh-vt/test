@@ -19,7 +19,6 @@ CREATE EXTENSION earthdistance;""")
 def get_all(db):
     return db.query(models.Places).all()
     
-
 # function for finding place by latitude and longitude stored in database
 def get_place_by_lat_n_lon(db: Session, lat: float, lon: float):
     return db.query(models.Places).filter(models.Places.latitude == lat, models.Places.longitude == lon).all()
@@ -31,7 +30,7 @@ def get_place_by_pin(db: Session, pin: str):
 # function to find places in the database within certain 'lim' Kms radius of given latitude and longitude using postgres 'earthradius module'
 # run query in postgres for extention cube, earthdistance before calling this function 
 def get_place_using_postgres(db: Session, lat: float, lon: float, lim:int):
-    db_list = db.query(models.Places).filter((func.earth_distance(func.ll_to_earth(models.Places.latitude, models.Places.longitude),func.ll_to_earth(lat, lon))/1000)<lim).order_by(func.earth_distance(func.ll_to_earth(models.Places.latitude, models.Places.longitude),func.ll_to_earth(lat, lon))/1000).all()
+    db_list = db.query(models.Places).filter((func.earth_distance(func.ll_to_earth(models.Places.latitude, models.Places.longitude),func.ll_to_earth(lat, lon))/1000)<1).order_by(func.earth_distance(func.ll_to_earth(models.Places.latitude, models.Places.longitude),func.ll_to_earth(lat, lon))/1000).all()
     print(db_list)
     return db_list
 
@@ -73,39 +72,10 @@ def get_place_using_self(db: Session, lat1: float, lon1: float, lim:int):
 
 # function to validate if location is present in the database by latitude and longitude 
 def loc_check(db: Session, lat: float, lon: float):
-    lat_list=[db.query(models.Places.latitude).filter(models.Places.latitude > lat).order_by(models.Places.latitude.asc()).first(),
-              db.query(models.Places.latitude).filter(models.Places.latitude <= lat).order_by(models.Places.latitude.desc()).first()]
-    lon_list=[db.query(models.Places.longitude).filter(models.Places.longitude > lon).order_by(models.Places.longitude.asc()).first(),
-              db.query(models.Places.longitude).filter(models.Places.longitude <= lon).order_by(models.Places.longitude.desc()).first()]
-    if (None in lat_list) : 
-        try :
-            res = [tup for tup in lat_list]
-            if not res.index(None):
-                lat_list = [(0,),res[1]]
-        except ValueError:
-            pass
-        try :
-            res = [tup for tup in lat_list]
-            if not res.index(None):
-                lat_list = [res[0],(0,)]
-        except ValueError:
-            pass
-    if (None in lon_list) : 
-        try :
-            res = [tup for tup in lon_list]
-            if not res.index(None):
-                lon_list = [(0,),res[1]]
-        except ValueError:
-            pass
-        try :
-            res = [tup for tup in lon_list]
-            if not res.index(None):
-                lon_list = [res[0],(0,)]
-        except ValueError:
-            pass
-    if (((abs(lat-lat_list[0][0])<0.001) or (abs(lat-lat_list[1][0])<0.001)) and ((abs(lon-lon_list[0][0])<0.001) or (abs(lon-lon_list[1][0])<0.001))):
+    llist = db.query(models.Places).filter((func.earth_distance(func.ll_to_earth(models.Places.latitude, models.Places.longitude),func.ll_to_earth(lat, lon))/1000)<1).all()
+    if len(llist)>0:
         return 1
-
+    
 # function to validate if location is present in the database by pincode
 def pin_check(db: Session, pin: str):
     return db.query(models.Places).filter(models.Places.pincode == pin).all()
@@ -128,22 +98,9 @@ def post_geof(db: Session, place: str,  lat: float, lon: float):
 
 # function to get location area name stored in database table "geo_table" accurate upto 0.1 degree
 def get_geof(db: Session, lat: float, lon: float):
-     llist=[db.query(models.Geof.id, models.Geof.latitude, models.Geof.longitude).filter(models.Geof.latitude > lat).order_by(models.Geof.latitude.asc()).first(),
-              db.query(models.Geof.id, models.Geof.latitude, models.Geof.longitude).filter(models.Geof.latitude <= lat).order_by(models.Geof.latitude.desc()).first()]
-     if (None in llist) : 
-         return False
-     k = abs(lat-llist[0][1])
-     l = abs(lat-llist[1][1])
-     m = abs(lon-llist[0][2])
-     n = abs(lon-llist[1][2])
-     if (((k<0.00001) and (m<0.00001)) or ((l<0.00001) and (n<0.00001))):
+    llist = db.query(models.Geof.id).filter((func.earth_distance(func.ll_to_earth(models.Geof.latitude, models.Geof.longitude),func.ll_to_earth(lat, lon))/1000)<1).order_by(func.earth_distance(func.ll_to_earth(models.Geof.latitude, models.Geof.longitude),func.ll_to_earth(lat, lon))/1000).all()
+    print(llist)
+    if len(llist)<1:
         return False
-     if (((k>0.1) or (m>0.1)) and ((l>0.1) or (n>0.1))):
-         # improve accuracy here but some locations will generate null for much smaller number
-        return False
-     if (k+m) < (l+n):
-         db_list = db.query(models.Geof.place_name).filter(models.Geof.id == llist[0][0]).all()
-     else:
-         db_list = db.query(models.Geof.place_name).filter(models.Geof.id == llist[1][0]).all()
-     return db_list
-    
+    else:
+        return db.query(models.Geof.place_name).filter(models.Geof.id == llist[0][0]).all()
