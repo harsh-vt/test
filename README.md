@@ -3,6 +3,8 @@
 glacial-hollows-86710.herokuapp.com/docs
 Backend for location handler with functions to store and find location by pincode, latitude, longitude and place name. Some additional functions to get nearest locations by two ways and additional function added to get location in a geojson file. Powered by FastAPI and hosted on Heroku.
 
+All contibutions are welcomed.
+
 # Requirements
 
  1. Python 3.7.2
